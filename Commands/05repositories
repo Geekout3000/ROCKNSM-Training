@@ -1,0 +1,74 @@
+### Configure repo:
+Locally on the student44 box navigate to: cd /etc/yum.repos.d
+do a "ll" to display the perched.repo
+sudo vi perched.repo
+curl 192.168.2.208:8008  (verify that repos are present)
+
+In sensor:  cd /etc/yum.repos.d
+ll (to list all the current repos)
+Remove all the current repos: "sudo rm -f *"
+
+Go back to student44 and scp the perched.repo file to sensor
+    "scp /etc/yum.repos.d/perched.repo sg10:~"
+
+Go back to sensor and move the file to the correct folder
+    Right now the file is in home, move it to yum.repo.d
+      "sudo mv perched.repo /etc/yum.repos.d/"
+      verify by navigating and running ll
+Install tcpdump:  sudo yum install tcpdump
+Run command in sensor:  sudo tcpdump -i enp2s0  (We should have traffic)
+
+## Installing Stenographer
+    1. ssh into sensor
+    2. sudo yum install stenographer
+    3. cd /etc/stenographer
+    4. ll
+    5. sudo vi config (make changes to the below option)
+        * PacketsDirectory should be changed to "/data/stenographer/packets"
+        * IndexDirectory changed to "/data/stenographer/index"
+        * Interface changed "enp2s0" (stenographer listens on this int)
+        * Port changed to "8086"
+        * Host changed to "172.16.100.100"
+        * wq
+    6. sudo stenokeys.sh stenographer stenographer  (creating keys for the group and user stenographer)
+        * should get back generating key/cert for client, server, and ca
+    7. sudo mkdir -p /data/stenographer/{packets,index}
+    8. sudo chown -R stenographer:stenographer /data/stenographer
+    9. $ `sudo systemctl start stenographer`
+    10. $ `sudo systemctl status stenographer`
+### Stenographer Validation
+    1. $ `cd /data/stenographer/packets`
+            * after a few seconds, list out and you should see a random string of numbers with stenographer stenographer as the user and group
+
+End of task, move to step 6 install Suricata: 06Config.md
+
+Validation command (not needed unless troubleshooting repo): "sudo yum makecache fast"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ls
+sudo vi perched.repo
+    [perched-local]
+    enabled
+    baseurl=http://perched-repo/repos/epel
+    gpgcheck=0
+sudo yum makecache fast
+yum search atom (just to confirm installation)
+
+Set up repo:
+cd /data
+df -h
+ls
+pwd
+sudo rsync -r admin@192.168.2.11:/data/share/repos . --progress

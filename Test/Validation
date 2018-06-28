@@ -1,0 +1,109 @@
+### The following commands will be run by instructor to validate ROCKNSM
+### installation on test day:
+
+curl 172.16.100.100:9200/_cat/indices
+sudo tcpdump -i enp2s0
+sudo systemctl stop suricata
+sudo systemctl stop stenographer
+sudo systemctl stop fsf
+sudo systemctl stop filebeat
+sudo systemctl stop zookeeper
+sudo systemctl stop kafka
+sudo systemctl stop logstash
+sudo systemctl stop elasticsearch
+sudo systemctl stop kibana
+sudo broctl stop
+        stopping worker-1-1 ...
+        stopping worker-1-2 ...
+        stopping proxy-1 ...
+        stopping manager ...
+        manager crashed during shutdown  (this is OK)
+
+### Suricata validation
+
+ls /data/suricata/logs
+sudo rm -rf /data/suricata/logs/*    (eve.json file is deleted)
+sudo systemctl start suricata
+ls /data/suricata/logs    (eve.json file is back)
+
+### stenographer Validation
+
+sudo rm -rf /data/stenographer/*
+sudo systemctl start stenographer
+ls /data/stenographer
+ls /data/stenographer/packets
+cd /data/stenographer
+
+### Bro Validation
+
+broctl start
+cd /data/bro/logs/current/
+ls  (to check presence of conn.log)
+
+### Zookeeper and Kafka
+
+sudo systemctl stop zookeeper
+sudo systemctl stop kafka
+sudo rm -rf /data/kafka/logs/*
+sudo rmr -rf /var/lib/zookeeper/version-2/
+sudo systemctl start zookeeper
+sudo systemctl start kafka
+give it a few seconds
+cd /data/kafka/logs/
+ls > should expect to see bro-raw-0 (this means bro is talking to kafka)
+
+### Filebeat Validation
+
+cd /data/kafka/logs/
+sudo systemctl start filebeat
+give it a few seconds
+ls
+  should now see the suricata-raw-0 file
+
+(If you don't see this, check vi /etc/filebeat/filebeat.yml; if that is correct, check kafka)
+
+
+### FSF Validation
+cd /data/fsf/logs
+em rockout.log
+sudo systemctl start fsf
+/opt/fsf/fsf-client//fsf_client.py --full daemon.log  (tab out after full and grab any file)
+    should get a json file return
+now do an ll and you will have your rockout.log back
+
+In cd /data/kafka/logs >>>> should now have fsf-raw-0
+
+### Elasticsearch
+
+sudo systemctl start elasticsearch
+curl 172.16.100.100:9200
+   once you get the output, you know elasticsearch is working
+
+### Logstash Validation
+
+sudo systemctl sstart logstash
+curl 172.16.100.100:9200/_cat/indices
+    you are looking for the 4th number to the last, this number should be going up each time you run the curl commands
+      typically suricata will increase
+
+### Kibana Validation
+
+sudo systemctl start kibana
+go the Webpage 172.16.100.100:5601
+    if you can get to the page, then success
+another check is on the kibana GUI >> Management >> index patterns >> type: bro-* >> Next >> select @timestamp >> create >>> refresh and view the log on the left or above
+        do for suricata-* and fsf-*
+
+
+cd /var/log
+ll
+  all the installed tools should be there (suricata, filebeat, logstash
+  , etc. Each one of them should have a log)
+cd Zookeeper
+ll
+cat zookeeper.log (this should show any error issues for more troubleshooting)
+
+do this for each of the files to determine if any errors or warnings, for example:
+    cat /var/log/logstash/logstash-plain.log | grep ERROR
+
+Some other troubleshooting concepts is to ensure the tool owns the file. check the permissions and change if necessary

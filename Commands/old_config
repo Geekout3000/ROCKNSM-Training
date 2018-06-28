@@ -1,0 +1,44 @@
+Connect to switch:  ssh admin@10.0.0.1 (password: perched1234!@#$)
+perched.training.switch# Enable
+Config terminal
+ip dhcp excluded-address 10.0.100.0 10.0.100.1
+ip dhcp pool instructor
+network 10.0.1.0 255.255.255.252
+default-router 10.0.100.1
+dns-server 192.168.2.1
+exit
+vlan 10
+name instructor
+state active
+no shutdown
+exit
+interface Gi 1/0/37
+switchport access vlan 10
+no shutdown
+exit
+interface vlan 10
+ip address 10.0.100.1 255.255.255.252
+no shutdown
+exit
+ip route 172.16.100.0 255.255.255.0 10.0.100.2
+
+
+Configure repo:
+cd /etc/yum.repos.d
+sudo rm -f *
+ls
+sudo vi perched.repo
+    [perched-local]
+    enabled
+    baseurl=http://perched-repo/repos/epel
+    gpgcheck=0
+sudo yum makecache fast
+yum search atom (just to confirm installation)
+
+### Some old repo notes
+Set up repo:
+cd /data
+df -h
+ls
+pwd
+sudo rsync -r admin@192.168.2.11:/data/share/repos . --progress

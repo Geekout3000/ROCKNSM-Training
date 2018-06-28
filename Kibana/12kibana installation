@@ -1,0 +1,17 @@
+ssh into sensor (sg10/Password123!@#)
+sudo yum install kibana
+sudo vi /etc/kibana/kibana.yml
+    line 7: uncomment server.host and change to "172.16.100.100" (quotes included)
+    line 21: uncomment the elasticsearch.url and change to "http://172.16.100.100:9200"
+    save: wq
+sudo firewall-cmd --add-port=5601/tcp --permanent
+sudo firewall-cmd --reload
+sudo systemctl start kibana
+sudo systemctl enable kibana
+
+### Validation
+Open a Webpage: 172.16.100.100:5601 (should get the kibana Webpage)
+    DevTools, located on the left side panel, are like curl commands (it searchess for information)
+      GET _cat/nodes or GET _cat/indices
+
+End of tasks, move to step 13 installing logstash

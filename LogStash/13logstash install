@@ -1,0 +1,110 @@
+ssh into sensor (sg10/Password123!@#)
+sudo yum install logstash
+cd /etc/logstash/conf.d
+ll (currently this is an empty directory)
+
+We need to create pipeline configurations by adding the filters, inputs, outputs to the /etc/logstash/conf.d location. The files are saved on this local machine in Documents, so scp over to sensor
+  Do for each tool (bro, suricata, fsf)
+
+On @user local machine:
+
+cd /Documents All 9 files are here, scp over to sensor)
+scp logstash-100-input-kafka-bro.conf sensor10@172.16.100.100:~
+scp logstash-100-input-kafka-suricata.conf sensor10@172.16.100.100:~
+scp logstash-100-input-kafka-fsf.conf sensor10@172.16.100.100:~
+scp logstash-500-filter-bro.conf sensor10@172.16.100.100:~
+scp logstash-500-filter-suricata.conf sensor10@172.16.100.100:~
+scp logstash-500-filter-fsf.conf sensor10@172.16.100.100:~
+scp logstash-999-output-es-bro.conf sensor10@172.16.100.100:~
+scp logstash-999-output-es-suricata.conf sensor10@172.16.100.100:~
+scp logstash-999-output-es-fsf.conf sensor10@172.16.100.100:~
+
+On sensor10 (not root)
+
+cd ~
+sudo mv logstash-100-input-kafka-bro.conf /etc/logstash/conf.d
+sudo mv logstash-100-input-kafka-suricata.conf /etc/logstash/conf.d
+sudo mv logstash-100-input-kafka-fsf.conf /etc/logstash/conf.d
+sudo mv logstash-500-filter-bro.conf /etc/logstash/conf.d
+sudo mv logstash-500-filter-suricata.conf /etc/logstash/conf.d
+sudo mv logstash-500-filter-fsf.conf /etc/logstash/conf.d
+sudo mv logstash-999-output-es-bro.conf /etc/logstash/conf.d
+sudo mv logstash-999-output-es-suricata.conf /etc/logstash/conf.d
+sudo mv logstash-999-output-es-fsf.conf /etc/logstash/conf.d
+
+On sensor 10
+cd /etc/logstash/conf.d
+ll
+We should have a total of 9 files: 3 filters, 3 oputputs, 3 inputs (bro, suricata, fsf should have one each)
+
+Before validation, do the following:
+sudo -s
+cd /etc/elasticsearch/
+curl -L -O http://perched-repo/sensor_configs/kibana/bro-mapping.json
+the curled repo may not be available on the test, so scp the file from @user to @sensor10
+    [user@localhost Documents]$ scp bro-mapping.json sensor10@172.16.100.100:~
+    [sensor@localhost~] mv bro-mapping.json /etc/elasticsearch/
+
+### Run fix 13.1
+
+### Pre-steps for last Validation
+
+Change the permissions for etc/elasticsearch/
+cd /etc
+sudo chmod 755 /etc/elasticsearch
+
+
+### Validate configuration files of the pipes
+
+First start/stop logstash to ensure logstash ran the files, and then run the script
+
+sudo systemctl start logstash
+Make sure plain.log is owned by logstash
+cd /var/log/logstash
+sudo chown logstash: logstash-plain.log
+sudo chown -R logstash: /var/lib/logstash
+
+Give it a 15 second pause, so that logstash can write to the directories
+sudo systemctl stop logstash
+cd /etc/logstash
+sudo /usr/share/logstash/bin/logstash --path.settings /etc/logstash/ -f /etc/logstash/conf.d/logstash-100-input-kafka-bro.conf -t
+sudo /usr/share/logstash/bin/logstash --path.settings /etc/logstash/ -f /etc/logstash/conf.d/logstash-500-filter-bro.conf -t
+sudo /usr/share/logstash/bin/logstash --path.settings /etc/logstash/ -f /etc/logstash/conf.d/logstash-999-output-es-bro.conf -t
+
+Do the above for all 9 files
+
+OR a one liner below will check for All 9
+
+cd /etc/logstash/
+for i in /etc/logstash/conf.d/*; do echo "testing $i" && sudo /usr/share/logstash/bin/logstash --path.settings /etc/logstash -f $i -t; done
+
+Should get an configuration ok reply back. If not TS.
+
+
+
+
+### TS
+cat /var/log/logstash/logstash-plain.log | grep ERROR (this will tell you which pipeline has a configuration error...scroll to locate)
+
+
+sudo systemctl stop logstash
+sudo systemctl stop elasticsearch
+sudo rm -rf /data/elasticsearch/data/nodes/0/indices
+sudo systemctl start elasticsearch
+sudo systemctl start logstash
+sudo systemctl status logstash
+
+
+### Final Validation:
+
+sudo systemctl status logstash
+Looking for a 3rd line that says: local.lan logstash [23457] sending logstash to
+If it doesn't immediately come up, just keep running status
+
+Once you get the successful startup with the 3rd line showing:
+
+curl 172.16.100.100:9200/_cat/indices
+    this should return information
+logstash is working correctly
+
+End of Test!!!!!!

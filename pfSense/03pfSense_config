@@ -1,0 +1,60 @@
+Use VGA connection for pfSense box
+Press F11 key
+Choose UEFI: General USB Flash Disk 1100
+Choose option 1 on menu
+Accept
+Install pfSense
+Keep default options
+Guided Disk Setup
+Any manual modification? NO
+Reboot and remove USB stick
+Select 1 (assign interface)
+VLANS set up? NO
+WAN: em0
+LAN: em1
+Optional interface OPT1: em2
+Optional interface OPT2: em3
+Proceed?  YES
+Set interface IP addresses: 2
+Select 1: Config WAN
+Config IPv4 via DHCP?  YES
+IPv6:  NO
+IPv6 address: press Enter for none
+Revert HTTP?  YES
+Select option 2: Config LAN
+Enter LAN IP:  172.16.100.1
+Subnet: 24
+Upstream gateway address:  none
+IPv6 address:  none
+Enable DHCP?  YES
+Start address of IPv4 range:  172.16.100.101
+End IPv4 range:  172.16.100.254
+Press Enter
+Turn off WIFI and turn on Wired Internet (if using laptop)
+Plug ethernet cord into LAN port on pfSense and ethernet port on laptop
+pfSense login page:  172.16.100.1
+User: admin
+Password: pfsense
+login
+Wizard, next, next, general info
+Hostname: sg10-pfsense
+Domain:  local.LAN
+Primary DNS:  192.168.2.1
+next
+Time server:  next
+Config WAN interface: uncheck private, uncheck bogon, next
+Config LAN interface: next
+Set admin password:  Password123!@#
+Save changes and reload
+Login to pfSense
+Firewall, rules, WAN, add, Protocol: Any, Save, Apply
+Firewall, rules, LAN, edit ipv4, source=any
+Delete IPv6 rules, save and apply
+Firewall, NAT, Outbound, Mode: Disable Outbound NAT, Save and apply
+Go to Setting up Span Port - Tap folder; open tap.md file for instructions
+Diagnostics, Backup & Restore, Download config as XML
+Diagnostics, Halt System (power off if box hangs)
+After tap configuration, power off boxes, move and connect to switch
+Change network settings on laptop from wired to wireless
+Once you have relocated the boxes; check to make sure you can still ping and access the pfsense via GUI
+End of task; move to step 4 ssh_key_removal

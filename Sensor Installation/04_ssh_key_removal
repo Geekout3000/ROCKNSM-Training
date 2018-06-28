@@ -1,0 +1,14 @@
+##Required to ssh into sensor
+####Because our boxes are now "remote" (on the table), we need to ensure that we can successfully ssh into the sensor
+
+
+cd .ssh/
+ll (to find known_hosts)
+vi known_hosts
+Look for 172.16.100.100
+Delete 172.16.100.100 fingerprint line (starting at .100 and ending at =)
+Save config wq
+Check connection by ssh to 172.16.100.100
+Should prompt to create new fingerprint, type yes
+
+Move to step 5 repositories in Command folder

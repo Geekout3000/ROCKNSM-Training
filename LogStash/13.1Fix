@@ -1,0 +1,22 @@
+If Bro does not work in logstash this is the quick fix. Something is wrong with the filter bro, so we will remove this
+
+cd /etc/logstash/conf.d
+ll
+rm -f logstash-500-filter-bro.conf
+
+Make changes to reflect the below in the output bro file
+sudo vi logstash-999-output-es-bro.conf
+
+output {
+    if [@metadata][stage] == "broraw_kafka" {
+        elasticsearch {
+            hosts => ["172.16.100.100"]
+            index => "bro-%{+YYYY.MM.dd}"
+            template => "/etc/elasticsearch/bro-mapping.json"
+            document_type => "_doc"
+        }
+    }
+}
+save: wq
+
+Go back to 13logstash install

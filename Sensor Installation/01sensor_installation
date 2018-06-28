@@ -1,0 +1,85 @@
+# Installing CENTOS on Sensor
+
+Plug in USB key and start sensor box
+Press F11 to access menu
+Choose USB option
+Change the time to etc and UTC
+Software Selection: Minimal Installation
+Installation Destination: Select both Hard Drives
+Automatically configure partitioning and check box to add additional space
+    Done
+    Delete all
+    Reclaim space
+Go back into Installation
+    I will configure partitioning
+    Done
+    Make sure LVM is selected
+    Click on Create Automatically
+    Delete swap mount
+    Highlight /home
+        On the right side, change the capacity to 1G
+        Click update setting button (bottom right)
+    Highlight /
+        Change the capacity to 1G (right side)
+        Click update setting button (bottom right)
+    Highlight /home
+          Under volume group, click Modify
+          Highlight only sda (or first partition listed)
+          Type Sensor-OS in text field
+          Save
+    Highlight /
+          Under volume group, change to sensor-OS
+          Highlight only sdb (or second partition listed)
+          Save
+    Note that both /home and / should be a part of the sensor-OS volume label
+    Create a Mount Point by clicking on the +
+      Name it /data
+      Capacity 1G
+      Click Add mount point
+    Highlight /data
+        On the right under volume group, select create a new group
+        Change name to sensor-data
+        Highlight second partition only
+        Save
+        Click Update Settings button
+    Highlight /
+      Change capacity to 10G
+      Click Update Settings button
+    Highlight /home
+      Blank capacity field to accept the remaining
+      Click Update Settings button
+    Highlight /data
+      Blank capacity field to accept the remaining
+      Click Update Settings button
+      Done
+      Done
+      Accept Changes
+Disable KDump
+  Uncheck "Enable KDump"
+  Done
+Network & Host Name
+  Click on Ethernet (enp0s31f6: Management)
+  Configure
+  General
+      Check "Automatically connect to this network"
+  Select IPv4 Settings
+      Change method to manual
+      Click Add
+          Input IP 172.16.100.100 (sensor)
+          Netmask is 24
+          GW: 172.16.100.1 (pfSense)
+          DNS: 192.168.2.1 (edge router)
+  Select IPv6 Settings
+      Change Method to Ignore
+      Save
+      Done
+Begin Installation
+User Creation
+    Username: sensor10
+    Check box "Make this user administrator"
+    Password:  Password123!@#
+    Done
+Finish Configuration
+Reboot and remove USB (manually restart box if sensor does not come back up)
+
+End of task, move to step2 sensor prep

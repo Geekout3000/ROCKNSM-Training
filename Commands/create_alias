@@ -1,0 +1,7 @@
+cd .ssh/
+sudo vi config
+    Host sg10
+    HostName 172.16.100.100
+    User admin
+    IdentityFile ~/.ssh/id_rsa
+    
